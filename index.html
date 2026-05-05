@@ -1,0 +1,503 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Diplomatic Scheduling Optimizer</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js"></script>
+  <style>
+    :root[data-theme="dark"] {
+      --bg: #0f0f0f; --bg-card: #161616; --bg-surface: #1e1e1e;
+      --border: rgba(255,255,255,0.08); --text: #e5e5e5; --text-2: #a0a0a0;
+      --text-muted: #606060; --accent: #E8A020; --accent-dim: rgba(232,160,32,0.1);
+      --green: #4ade80; --red: #f87171; --blue: #60a5fa; --yellow: #fbbf24;
+      --grid-line: rgba(255,255,255,0.04);
+    }
+    :root[data-theme="light"] {
+      --bg: #f8f7f4; --bg-card: #fff; --bg-surface: #f0efeb;
+      --border: rgba(0,0,0,0.08); --text: #1a1a1a; --text-2: #555;
+      --text-muted: #999; --accent: #c47800; --accent-dim: rgba(196,120,0,0.08);
+      --green: #16a34a; --red: #dc2626; --blue: #1d6fb5; --yellow: #d97706;
+      --grid-line: rgba(0,0,0,0.04);
+    }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body { background: var(--bg); color: var(--text); font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; font-size: 14px; line-height: 1.6; min-height: 100vh; transition: background 0.2s, color 0.2s; }
+    .container { max-width: 1100px; margin: 0 auto; padding: 40px 20px; }
+    header { display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 32px; gap: 16px; }
+    .header-left h1 { font-size: 22px; font-weight: 700; letter-spacing: -0.3px; }
+    .header-left p { font-size: 13px; color: var(--text-2); margin-top: 4px; }
+    .badge { display: inline-block; background: var(--accent-dim); color: var(--accent); border: 1px solid rgba(232,160,32,0.2); font-size: 10px; font-family: monospace; padding: 2px 8px; border-radius: 100px; margin-top: 6px; }
+    .controls { display: flex; gap: 8px; flex-wrap: wrap; }
+    .btn { padding: 7px 16px; border-radius: 8px; border: 1px solid var(--border); background: var(--bg-card); color: var(--text-2); font-size: 12px; cursor: pointer; transition: all 0.15s; white-space: nowrap; }
+    .btn:hover { color: var(--text); border-color: var(--accent); }
+    .btn-accent { background: var(--accent); color: #000; border-color: var(--accent); font-weight: 600; }
+    .btn-accent:hover { background: #f0b030; }
+    .kpi-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 12px; margin-bottom: 28px; }
+    .kpi-card { background: var(--bg-card); border: 1px solid var(--border); border-radius: 10px; padding: 16px; }
+    .kpi-label { font-size: 11px; font-family: monospace; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 6px; }
+    .kpi-value { font-size: 22px; font-weight: 700; line-height: 1; }
+    .kpi-sub { font-size: 11px; color: var(--text-2); margin-top: 4px; }
+    .section-label { font-size: 11px; font-family: monospace; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 12px; }
+    .chart-card { background: var(--bg-card); border: 1px solid var(--border); border-radius: 12px; padding: 20px; margin-bottom: 20px; }
+    .chart-title { font-size: 13px; font-weight: 600; margin-bottom: 4px; }
+    .chart-sub { font-size: 12px; color: var(--text-2); margin-bottom: 16px; }
+
+    /* Gantt Chart */
+    .gantt-container { overflow-x: auto; }
+    .gantt { font-size: 11px; font-family: monospace; min-width: 800px; }
+    .gantt-header { display: grid; border-bottom: 1px solid var(--border); padding-bottom: 8px; margin-bottom: 4px; color: var(--text-muted); font-size: 10px; text-transform: uppercase; letter-spacing: 0.06em; }
+    .gantt-row { display: grid; align-items: center; padding: 3px 0; border-bottom: 1px solid var(--grid-line); }
+    .gantt-row:hover { background: var(--bg-surface); }
+    .gantt-room { font-weight: 600; color: var(--text); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; padding-right: 8px; }
+    .gantt-slots { position: relative; height: 22px; }
+    .gantt-block { position: absolute; height: 18px; top: 2px; border-radius: 3px; display: flex; align-items: center; padding: 0 4px; font-size: 10px; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; cursor: pointer; transition: filter 0.1s; }
+    .gantt-block:hover { filter: brightness(1.2); z-index: 10; }
+    .dept-state { background: rgba(232,160,32,0.7); color: #000; }
+    .dept-consular { background: rgba(96,165,250,0.7); color: #000; }
+    .dept-admin { background: rgba(74,222,128,0.7); color: #000; }
+    .dept-security { background: rgba(248,113,113,0.7); color: #000; }
+    .dept-protocol { background: rgba(167,139,250,0.7); color: #000; }
+
+    .algo-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 12px; margin-bottom: 28px; }
+    .algo-card { background: var(--bg-card); border: 1px solid var(--border); border-radius: 10px; padding: 16px; }
+    .algo-name { font-size: 12px; font-weight: 700; font-family: monospace; margin-bottom: 4px; }
+    .algo-desc { font-size: 12px; color: var(--text-2); line-height: 1.5; }
+
+    .table-card { background: var(--bg-card); border: 1px solid var(--border); border-radius: 12px; overflow: hidden; margin-bottom: 20px; }
+    .table-header { padding: 14px 20px; border-bottom: 1px solid var(--border); font-size: 13px; font-weight: 600; }
+    table { width: 100%; border-collapse: collapse; font-size: 12px; }
+    th { font-family: monospace; font-size: 10px; text-transform: uppercase; letter-spacing: 0.07em; color: var(--text-muted); padding: 8px 16px; text-align: left; border-bottom: 1px solid var(--border); background: var(--bg-surface); }
+    td { padding: 8px 16px; color: var(--text-2); border-bottom: 1px solid var(--border); }
+    tr:last-child td { border-bottom: none; }
+    tr:hover td { background: var(--bg-surface); color: var(--text); }
+    .priority-high { color: var(--red); font-weight: 600; }
+    .priority-med { color: var(--yellow); font-weight: 600; }
+    .priority-low { color: var(--text-muted); }
+    .status-scheduled { color: var(--green); }
+    .status-queued { color: var(--text-muted); }
+
+    .progress-bar { height: 6px; border-radius: 3px; background: var(--bg-surface); overflow: hidden; margin-top: 4px; }
+    .progress-fill { height: 100%; border-radius: 3px; background: var(--accent); transition: width 0.4s; }
+    .progress-fill.green { background: var(--green); }
+
+    footer { border-top: 1px solid var(--border); padding-top: 20px; margin-top: 20px; font-size: 11px; color: var(--text-muted); }
+    footer a { color: var(--text-2); }
+
+    @media (max-width: 600px) {
+      .header-left h1 { font-size: 18px; }
+    }
+  </style>
+</head>
+<body>
+<div class="container">
+  <header>
+    <div class="header-left">
+      <h1>Diplomatic Scheduling Optimizer</h1>
+      <p>Priority-aware resource allocation for 20 conference rooms, 150 personnel across 5 departments</p>
+      <span class="badge">GREEDY · PRIORITY SCORING · CONFLICT DETECTION</span>
+    </div>
+    <div class="controls">
+      <button class="btn btn-accent" onclick="runOptimizer()">Run Optimizer</button>
+      <button class="btn" onclick="toggleTheme()">Toggle theme</button>
+    </div>
+  </header>
+
+  <div class="kpi-row" id="kpiRow"></div>
+
+  <!-- Gantt -->
+  <div class="chart-card">
+    <div class="chart-title">Room Schedule — Today (8:00 AM – 6:00 PM)</div>
+    <div class="chart-sub">Each block = one scheduled meeting. Color = department. Hover for details.</div>
+    <div class="gantt-container">
+      <div class="gantt" id="ganttChart"></div>
+    </div>
+  </div>
+
+  <!-- Utilization chart -->
+  <div class="chart-card">
+    <div class="chart-title">Room Utilization</div>
+    <div class="chart-sub">Percentage of available time slots filled per room</div>
+    <div style="position:relative;height:220px"><canvas id="utilizationChart"></canvas></div>
+  </div>
+
+  <!-- Algorithm explanation -->
+  <p class="section-label">Scheduling Algorithm</p>
+  <div class="algo-grid">
+    <div class="algo-card">
+      <div class="algo-name">Priority Scoring</div>
+      <div class="algo-desc">Each meeting request scores: base priority (1–5) × clearance weight × urgency flag. High-priority meetings are scheduled first and get first pick of available rooms.</div>
+    </div>
+    <div class="algo-card">
+      <div class="algo-name">Conflict Detection</div>
+      <div class="algo-desc">Before assigning a room+timeslot, the scheduler checks: (1) room not double-booked, (2) required attendees have no overlapping commitments, (3) clearance level satisfied.</div>
+    </div>
+    <div class="algo-card">
+      <div class="algo-name">Greedy Assignment</div>
+      <div class="algo-desc">Sorted priority queue. For each meeting, finds the earliest available room that satisfies all constraints. Unschedulable meetings are flagged and queued for rescheduling.</div>
+    </div>
+    <div class="algo-card">
+      <div class="algo-name">Utilization Optimization</div>
+      <div class="algo-desc">After initial pass, a secondary sweep fills gaps with lower-priority meetings, maximizing room utilization without violating any constraints.</div>
+    </div>
+  </div>
+
+  <!-- Meeting table -->
+  <div class="table-card">
+    <div class="table-header" id="tableHeader">Scheduled Meetings</div>
+    <div style="overflow-x:auto">
+      <table>
+        <thead><tr><th>Meeting</th><th>Department</th><th>Room</th><th>Time</th><th>Duration</th><th>Priority</th><th>Attendees</th><th>Status</th></tr></thead>
+        <tbody id="meetingTableBody"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <footer>
+    <strong>Scenario:</strong> Synthetic diplomatic operations scheduling — 20 rooms, 150 personnel, 180 meeting requests.
+    Data is entirely synthetic; no real personnel or diplomatic information is used.<br>
+    <strong>Inspired by:</strong> Resource scheduling systems built for the U.S. Department of State (New Delhi mission, 2021–2024).<br>
+    <strong>Built by:</strong> Akshay Kumar — <a href="https://akbknight.github.io" target="_blank">akbknight.github.io</a>
+  </footer>
+</div>
+
+<script>
+// ── Constants ─────────────────────────────────────────────────────────────
+const DEPARTMENTS = ['State', 'Consular', 'Admin', 'Security', 'Protocol'];
+const DEPT_CLASS = { State: 'dept-state', Consular: 'dept-consular', Admin: 'dept-admin', Security: 'dept-security', Protocol: 'dept-protocol' };
+const ROOM_NAMES = [
+  'Roosevelt Room','Lincoln Room','Jefferson Hall','Hamilton Suite','Monroe Conf',
+  'Adams Room','Madison Hall','Washington Conf','Jackson Suite','Tyler Room',
+  'Polk Hall','Taylor Suite','Fillmore Conf','Pierce Room','Buchanan Hall',
+  'Johnson Suite','Grant Room','Hayes Conf','Garfield Hall','Arthur Suite'
+];
+const MEETING_TYPES = ['Briefing','Review','Negotiation','Working Group','Consular Session','Security Brief','Protocol Meeting','Press Conf','Training','Ops Meeting'];
+const TIME_SLOTS = 20; // 8:00 AM to 6:00 PM in 30-min increments
+const N_MEETINGS = 180;
+const N_ROOMS = 20;
+const N_PERSONNEL = 150;
+
+let lastResult = null;
+let utilizationChartObj = null;
+
+// ── Seeded RNG ─────────────────────────────────────────────────────────────
+function mulberry32(seed) {
+  return function() {
+    seed |= 0; seed = seed + 0x6D2B79F5 | 0;
+    let t = Math.imul(seed ^ seed >>> 15, 1 | seed);
+    t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t;
+    return ((t ^ t >>> 14) >>> 0) / 4294967296;
+  };
+}
+const rng = mulberry32(42);
+
+function randInt(min, max) { return Math.floor(rng() * (max - min + 1)) + min; }
+function pick(arr) { return arr[Math.floor(rng() * arr.length)]; }
+
+// ── Data Generation ────────────────────────────────────────────────────────
+function generateData() {
+  const personnel = Array.from({ length: N_PERSONNEL }, (_, i) => ({
+    id: i,
+    name: `Personnel ${i + 1}`,
+    dept: DEPARTMENTS[i % DEPARTMENTS.length],
+    clearance: randInt(1, 5),
+  }));
+
+  const rooms = ROOM_NAMES.map((name, i) => ({
+    id: i, name,
+    capacity: randInt(6, 30),
+    clearance: randInt(1, 5),
+  }));
+
+  const meetings = Array.from({ length: N_MEETINGS }, (_, i) => {
+    const dept = pick(DEPARTMENTS);
+    const deptPersonnel = personnel.filter(p => p.dept === dept);
+    const attendeeCount = randInt(2, Math.min(12, deptPersonnel.length));
+    const attendees = [];
+    const pool = [...deptPersonnel];
+    for (let j = 0; j < attendeeCount && pool.length > 0; j++) {
+      const idx = Math.floor(rng() * pool.length);
+      attendees.push(pool[idx].id);
+      pool.splice(idx, 1);
+    }
+    return {
+      id: i,
+      title: `${pick(MEETING_TYPES)} ${i + 1}`,
+      dept,
+      priority: randInt(1, 5),
+      duration: pick([1, 1, 1, 2, 2, 3, 4]),
+      clearance: randInt(1, 3),
+      attendees,
+      attendeeCount: attendees.length,
+      preferredStart: randInt(0, TIME_SLOTS - 4),
+    };
+  });
+
+  return { personnel, rooms, meetings };
+}
+
+// ── Scheduling Algorithm ───────────────────────────────────────────────────
+function runScheduler(data) {
+  const { meetings, rooms } = data;
+
+  // Room availability: 2D array [room][slot] = meetingId or null
+  const schedule = Array.from({ length: N_ROOMS }, () => new Array(TIME_SLOTS).fill(null));
+  // Personnel availability: Set of (personId, slot) occupied
+  const personnelBusy = new Map(); // personId => Set of slots
+
+  const sorted = [...meetings].sort((a, b) => b.priority - a.priority);
+  const results = [];
+  let scheduled = 0, unscheduled = 0;
+
+  for (const mtg of sorted) {
+    let found = false;
+
+    // Try from preferred start, wrapping forward
+    for (let offset = 0; offset < TIME_SLOTS && !found; offset++) {
+      const startSlot = (mtg.preferredStart + offset) % (TIME_SLOTS - mtg.duration + 1);
+      if (startSlot + mtg.duration > TIME_SLOTS) continue;
+
+      for (let r = 0; r < N_ROOMS && !found; r++) {
+        const room = rooms[r];
+        if (room.clearance < mtg.clearance) continue;
+        if (room.capacity < mtg.attendeeCount) continue;
+
+        // Check room free for all slots
+        let roomFree = true;
+        for (let s = startSlot; s < startSlot + mtg.duration; s++) {
+          if (schedule[r][s] !== null) { roomFree = false; break; }
+        }
+        if (!roomFree) continue;
+
+        // Check attendees free
+        let attendeesFree = true;
+        for (const pid of mtg.attendees) {
+          const busy = personnelBusy.get(pid) || new Set();
+          for (let s = startSlot; s < startSlot + mtg.duration; s++) {
+            if (busy.has(s)) { attendeesFree = false; break; }
+          }
+          if (!attendeesFree) break;
+        }
+        if (!attendeesFree) continue;
+
+        // Assign
+        for (let s = startSlot; s < startSlot + mtg.duration; s++) {
+          schedule[r][s] = mtg.id;
+        }
+        for (const pid of mtg.attendees) {
+          if (!personnelBusy.has(pid)) personnelBusy.set(pid, new Set());
+          for (let s = startSlot; s < startSlot + mtg.duration; s++) {
+            personnelBusy.get(pid).add(s);
+          }
+        }
+
+        results.push({
+          ...mtg, roomId: r, roomName: rooms[r].name,
+          startSlot, startTime: slotToTime(startSlot),
+          endTime: slotToTime(startSlot + mtg.duration),
+          durationLabel: mtg.duration === 1 ? '30 min' : `${mtg.duration * 30} min`,
+          status: 'scheduled'
+        });
+        scheduled++;
+        found = true;
+      }
+    }
+
+    if (!found) {
+      results.push({ ...mtg, roomId: null, roomName: '—', startSlot: null, startTime: '—', endTime: '—', durationLabel: mtg.duration === 1 ? '30 min' : `${mtg.duration * 30} min`, status: 'queued' });
+      unscheduled++;
+    }
+  }
+
+  // Compute utilization per room
+  const utilization = rooms.map((room, r) => {
+    const usedSlots = schedule[r].filter(v => v !== null).length;
+    return { name: room.name, pct: Math.round(usedSlots / TIME_SLOTS * 100) };
+  });
+
+  return { results, schedule, utilization, scheduled, unscheduled, total: meetings.length };
+}
+
+function slotToTime(slot) {
+  const hour = 8 + Math.floor(slot / 2);
+  const min = (slot % 2) * 30;
+  return `${hour}:${min === 0 ? '00' : '30'}`;
+}
+
+// ── Rendering ──────────────────────────────────────────────────────────────
+function renderKPIs(result, data) {
+  const container = document.getElementById('kpiRow');
+  container.textContent = '';
+  const scheduledPct = Math.round(result.scheduled / result.total * 100);
+  const avgUtil = Math.round(result.utilization.reduce((s, r) => s + r.pct, 0) / result.utilization.length);
+  const conflictsResolved = result.total - result.unscheduled;
+
+  const kpis = [
+    { label: 'Meetings Scheduled', value: result.scheduled, sub: `${scheduledPct}% success rate`, color: 'var(--green)' },
+    { label: 'Unscheduled', value: result.unscheduled, sub: 'Queued for retry', color: result.unscheduled > 0 ? 'var(--yellow)' : 'var(--text)' },
+    { label: 'Avg Room Utilization', value: avgUtil + '%', sub: `${N_ROOMS} rooms · 10 hrs`, color: avgUtil > 70 ? 'var(--accent)' : 'var(--text)' },
+    { label: 'Personnel', value: N_PERSONNEL, sub: `5 departments`, color: 'var(--text)' },
+    { label: 'Conflicts Resolved', value: conflictsResolved, sub: 'Constraint-aware', color: 'var(--blue)' },
+  ];
+
+  kpis.forEach(k => {
+    const card = document.createElement('div');
+    card.className = 'kpi-card';
+    card.appendChild(Object.assign(document.createElement('div'), { className: 'kpi-label', textContent: k.label }));
+    const val = document.createElement('div');
+    val.className = 'kpi-value';
+    val.style.color = k.color;
+    val.textContent = String(k.value);
+    card.appendChild(val);
+    card.appendChild(Object.assign(document.createElement('div'), { className: 'kpi-sub', textContent: k.sub }));
+    container.appendChild(card);
+  });
+}
+
+function renderGantt(result, data) {
+  const gantt = document.getElementById('ganttChart');
+  gantt.textContent = '';
+
+  const cols = `120px 1fr`;
+  const scheduledByRoom = {};
+  result.results.filter(r => r.status === 'scheduled').forEach(r => {
+    if (!scheduledByRoom[r.roomId]) scheduledByRoom[r.roomId] = [];
+    scheduledByRoom[r.roomId].push(r);
+  });
+
+  // Header
+  const header = document.createElement('div');
+  header.className = 'gantt-header';
+  header.style.gridTemplateColumns = cols;
+  header.appendChild(Object.assign(document.createElement('div'), { textContent: 'Room' }));
+  const timeHeader = document.createElement('div');
+  timeHeader.style.cssText = 'position:relative;height:16px';
+  for (let s = 0; s < TIME_SLOTS; s += 2) {
+    const lbl = document.createElement('span');
+    lbl.style.cssText = `position:absolute;left:${s / TIME_SLOTS * 100}%;font-size:9px;color:var(--text-muted)`;
+    lbl.textContent = slotToTime(s);
+    timeHeader.appendChild(lbl);
+  }
+  header.appendChild(timeHeader);
+  gantt.appendChild(header);
+
+  data.rooms.forEach((room, r) => {
+    const row = document.createElement('div');
+    row.className = 'gantt-row';
+    row.style.gridTemplateColumns = cols;
+
+    const nameEl = document.createElement('div');
+    nameEl.className = 'gantt-room';
+    nameEl.textContent = room.name;
+    row.appendChild(nameEl);
+
+    const slotsEl = document.createElement('div');
+    slotsEl.className = 'gantt-slots';
+
+    (scheduledByRoom[r] || []).forEach(mtg => {
+      const block = document.createElement('div');
+      block.className = `gantt-block ${DEPT_CLASS[mtg.dept] || 'dept-admin'}`;
+      block.style.left = `${mtg.startSlot / TIME_SLOTS * 100}%`;
+      block.style.width = `${mtg.duration / TIME_SLOTS * 100}%`;
+      block.title = `${mtg.title}\n${mtg.startTime}–${mtg.endTime}\n${mtg.dept} · ${mtg.attendeeCount} attendees · Priority ${mtg.priority}`;
+      block.textContent = mtg.title.split(' ').slice(0, 2).join(' ');
+      slotsEl.appendChild(block);
+    });
+
+    row.appendChild(slotsEl);
+    gantt.appendChild(row);
+  });
+}
+
+function renderUtilizationChart(result) {
+  const ctx = document.getElementById('utilizationChart').getContext('2d');
+  if (utilizationChartObj) { utilizationChartObj.destroy(); utilizationChartObj = null; }
+
+  const util = result.utilization;
+  const textMuted = getComputedStyle(document.documentElement).getPropertyValue('--text-muted').trim();
+  const border = getComputedStyle(document.documentElement).getPropertyValue('--grid-line').trim();
+
+  utilizationChartObj = new Chart(ctx, {
+    type: 'bar',
+    data: {
+      labels: util.map(r => r.name.replace(' Room','').replace(' Hall','').replace(' Suite','').replace(' Conf','')),
+      datasets: [{
+        data: util.map(r => r.pct),
+        backgroundColor: util.map(r => r.pct > 70 ? 'rgba(232,160,32,0.7)' : r.pct > 40 ? 'rgba(96,165,250,0.6)' : 'rgba(255,255,255,0.15)'),
+        borderRadius: 4,
+      }]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      plugins: { legend: { display: false }, tooltip: { callbacks: { label: ctx => `${ctx.parsed.y}% utilized` } } },
+      scales: {
+        x: { ticks: { color: textMuted, font: { size: 9, family: 'monospace' }, maxRotation: 30 }, grid: { display: false }, border: { display: false } },
+        y: { min: 0, max: 100, ticks: { color: textMuted, font: { size: 10, family: 'monospace' }, callback: v => v + '%' }, grid: { color: border }, border: { display: false } }
+      }
+    }
+  });
+}
+
+function renderTable(result) {
+  const tbody = document.getElementById('meetingTableBody');
+  tbody.textContent = '';
+  document.getElementById('tableHeader').textContent = `Scheduled Meetings (${result.scheduled} of ${result.total} assigned)`;
+
+  const sorted = [...result.results].sort((a, b) => {
+    if (a.status === 'scheduled' && b.status !== 'scheduled') return -1;
+    if (b.status === 'scheduled' && a.status !== 'scheduled') return 1;
+    return b.priority - a.priority;
+  }).slice(0, 40);
+
+  sorted.forEach(m => {
+    const row = document.createElement('tr');
+    const priClass = m.priority >= 4 ? 'priority-high' : m.priority === 3 ? 'priority-med' : 'priority-low';
+    const statusClass = m.status === 'scheduled' ? 'status-scheduled' : 'status-queued';
+    const cells = [
+      ['date-cell', m.title],
+      [null, m.dept],
+      [null, m.roomName],
+      ['', m.startTime + (m.endTime !== '—' ? '–' + m.endTime : '')],
+      [null, m.durationLabel],
+      [priClass, '★'.repeat(m.priority)],
+      [null, m.attendeeCount + ' people'],
+      [statusClass, m.status],
+    ];
+    cells.forEach(([cls, text]) => {
+      const td = document.createElement('td');
+      if (cls) td.className = cls;
+      td.textContent = text;
+      row.appendChild(td);
+    });
+    tbody.appendChild(row);
+  });
+}
+
+// ── Main ───────────────────────────────────────────────────────────────────
+function runOptimizer() {
+  const data = generateData();
+  const result = runScheduler(data);
+  lastResult = result;
+
+  renderKPIs(result, data);
+  renderGantt(result, data);
+  renderUtilizationChart(result);
+  renderTable(result);
+
+  console.log(`Scheduled: ${result.scheduled}/${result.total} (${Math.round(result.scheduled/result.total*100)}%)`);
+}
+
+function toggleTheme() {
+  const t = document.documentElement.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+  document.documentElement.setAttribute('data-theme', t);
+  localStorage.setItem('theme', t);
+  if (lastResult) { renderUtilizationChart(lastResult); }
+}
+
+(function() {
+  const saved = localStorage.getItem('theme');
+  if (saved) document.documentElement.setAttribute('data-theme', saved);
+  runOptimizer();
+})();
+</script>
+</body>
+</html>
