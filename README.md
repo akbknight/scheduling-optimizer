@@ -1,8 +1,19 @@
-# Diplomatic Scheduling Optimizer
+# Diplomatic Resource & Scheduling Optimizer
 
-Priority-aware resource scheduling system for high-stakes operational environments. Assigns **180 meeting requests** to **20 conference rooms** and **150 personnel** across 5 departments using a constrained greedy algorithm with real-time conflict detection. Runs entirely in the browser — no backend, no build step.
+> [!IMPORTANT]
+> **Enterprise Operations Research Engine · Part of the Akshay Kumar Technical Portfolio Ecosystem**  
+> 🌐 **Executive Portfolio:** [https://akbknight.github.io/](https://akbknight.github.io/) · 💼 **LinkedIn:** [linkedin.com/in/akshaykumardl](https://www.linkedin.com/in/akshaykumardl/) · 📄 **Curriculum Vitae:** [Download PDF (369 KB)](https://akbknight.github.io/assets/Akshay_Resume.pdf)
 
-**Live demo:** [akbknight.github.io/scheduling-optimizer](https://akbknight.github.io/scheduling-optimizer/)
+[![Live Demo](https://img.shields.io/badge/Live%20Demo-GitHub%20Pages-0284c7?style=flat-square&logo=github)](https://akbknight.github.io/scheduling-optimizer/)
+[![Algorithm](https://img.shields.io/badge/Algorithm-Constrained%20Greedy%20(NP--Hard)-10b981?style=flat-square)](https://akbknight.github.io/scheduling-optimizer/)
+[![Execution Speed](https://img.shields.io/badge/Execution%20Latency-%3C5ms%20Client--Side-blue?style=flat-square)](https://akbknight.github.io/scheduling-optimizer/)
+[![Enterprise Origin](https://img.shields.io/badge/Origin-U.S.%20Dept%20of%20State%20Architecture-8b5cf6?style=flat-square)](https://akbknight.github.io/scheduling-optimizer/)
+[![Author](https://img.shields.io/badge/Author-Akshay%20Kumar-09090b?style=flat-square&logo=linkedin)](https://www.linkedin.com/in/akshaykumardl/)
+[![License: MIT](https://img.shields.io/badge/License-MIT-gray?style=flat-square)](LICENSE)
+
+A priority-aware, multi-constraint resource scheduling engine for high-stakes operational environments. Resolves **180 concurrent meeting requests** across **20 secure conference facilities** and **150 cleared personnel** spanning 5 diplomatic departments using a greedy constraint-satisfaction heuristic with deterministic real-time conflict detection. Runs 100% client-side with zero latency.
+
+👉 **Launch Live Demo:** **[https://akbknight.github.io/scheduling-optimizer/](https://akbknight.github.io/scheduling-optimizer/)**
 
 ---
 
@@ -136,7 +147,12 @@ scheduling-optimizer/
 
 ---
 
-## Author
+## 👤 Author & Strategic Portfolio
 
-**Akshay Kumar**
-[akbknight.github.io](https://akbknight.github.io) · [linkedin.com/in/akshaykumardl](https://www.linkedin.com/in/akshaykumardl/)
+**Akshay Kumar**  
+STEM MBA Candidate · Business Analytics & AI · American University Kogod School of Business  
+Former Computer Programmer · U.S. Department of State  
+- **Executive Portfolio:** [https://akbknight.github.io/](https://akbknight.github.io/)  
+- **LinkedIn Profile:** [linkedin.com/in/akshaykumardl](https://www.linkedin.com/in/akshaykumardl/)  
+- **Direct Résumé:** [Download PDF (369 KB)](https://akbknight.github.io/assets/Akshay_Resume.pdf)  
+- **Email:** [ak8335a@american.edu](mailto:ak8335a@american.edu)
