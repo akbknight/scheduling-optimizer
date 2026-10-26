@@ -156,3 +156,22 @@ Former Computer Programmer · U.S. Department of State
 - **LinkedIn Profile:** [linkedin.com/in/akshaykumardl](https://www.linkedin.com/in/akshaykumardl/)  
 - **Direct Résumé:** [Download PDF (369 KB)](https://akbknight.github.io/assets/Akshay_Resume.pdf)  
 - **Email:** [ak8335a@american.edu](mailto:ak8335a@american.edu)
+
+
+---
+
+## 🔬 Algorithmic Benchmark & Baseline Comparison
+
+Benchmarked on a standardized 180-meeting workload with 20 rooms and 150 personnel:
+
+| Scheduling Policy | Meetings Scheduled | Requests Queued | Fill Rate (%) | Priority Points Served | Relative Gain | Runtime |
+|:---|---:|---:|---:|---:|---:|---:|
+| **Priority Greedy (Heuristic)** | **107** | 73 | **59.4%** | **357** | **+24.4%** | **7.33 ms** |
+| **Shortest Duration First** | 107 | 73 | 59.4% | 295 | +2.8% | 4.84 ms |
+| **Arrival Order Baseline (FCFS)** | 103 | 77 | 57.2% | 287 | Baseline | 6.92 ms |
+
+### Key Findings & Boundary:
+1. **Measurable Prioritization Value:** Priority-Greedy serves **24.4% more priority points** than FIFO arrival order by prioritizing high-stakes meetings into constrained premium spaces.
+2. **Hard Constraints Enforced:** Zero room-capacity, room-clearance, or schedule overlap violations.
+3. **Personnel Rule Boundary:** 61 scheduled meetings contained an attendee below meeting clearance, demonstrating that facility room clearance is enforced while attendee-level clearance rule enforcement remains a future constraint refinement.
+4. **Reproducibility:** Run `node scripts/benchmark_scheduler.cjs` or review [`reports/benchmark_audit.md`](reports/benchmark_audit.md).
