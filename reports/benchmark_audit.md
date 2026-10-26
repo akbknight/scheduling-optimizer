@@ -4,7 +4,8 @@
 **Author:** Akshay Kumar  
 **Target Codebase:** `scheduling-optimizer`  
 **Evaluation Script:** `scripts/benchmark_scheduler.cjs`  
-**Benchmark Instance:** Synthetic benchmark seed 42 (180 meeting requests, 20 facility rooms, 150 personnel)
+**Benchmark Instance:** Synthetic benchmark seed 42 (180 meeting requests, 20 facility rooms, 150 personnel)  
+**Structured Output:** `reports/benchmark_results.json`
 
 ---
 
@@ -24,17 +25,17 @@
 
 | Scheduling Policy | Meetings Scheduled | Requests Queued | Fill Rate (%) | Priority Points Served | Relative Point Gain | Runtime (ms) |
 |:---|---:|---:|---:|---:|---:|---:|
-| **Priority Greedy (Heuristic)** | **107** | 73 | **59.4%** | **357** | **+24.4%** | **~7–12 ms** |
-| **Shortest Duration First** | 107 | 73 | 59.4% | 295 | +2.8% | ~5–9 ms |
-| **Arrival Order Baseline (FCFS)**| 103 | 77 | 57.2% | 287 | Baseline | ~7–12 ms |
+| **Priority greedy** | **107** | 73 | **59.4%** | **357** | **+24.4%** | ~7.41 ms |
+| Arrival order baseline | 103 | 77 | 57.2% | 287 | Baseline | ~2.28 ms |
+| Shortest duration first | 107 | 73 | 59.4% | 295 | +2.8% | ~2.96 ms |
 
 ---
 
 ## 3. Constraint Verification & Security Boundary
 
 1. **Room Capacity:** Enforced. Zero instances of room capacity < attendee count.
-2. **Room Clearance:** Enforced. Zero instances of room classification < meeting classification requirement.
-3. **Double-Booking:** Enforced. Zero overlapping meetings in the same room or for the same attendee.
+2. **Room Clearance:** Enforced. Zero instances of room classification < meeting classification requirement (0 violations).
+3. **Double-Booking:** Enforced. Zero overlapping meetings in the same room or for the same attendee (0 violations).
 4. **Attendee Clearance (Unresolved Boundary):** In the reference implementation, 61 of 107 scheduled meetings include at least one attendee whose personal clearance level is below the meeting classification requirement. The scheduler verifies facility room clearance, but requires a separate attendee-clearance rule prior to compliance certification.
 
 ---
@@ -45,3 +46,4 @@ To reproduce this benchmark directly:
 ```bash
 node scripts/benchmark_scheduler.cjs
 ```
+All tables and takeaway figures in this report are synchronized directly from `reports/benchmark_results.json`.

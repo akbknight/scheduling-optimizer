@@ -1,0 +1,50 @@
+{
+  "benchmark_instance": {
+    "seed": 42,
+    "meetings": 180,
+    "rooms": 20,
+    "personnel": 150
+  },
+  "policy_results": [
+    {
+      "policy": "Priority greedy",
+      "scheduled": 107,
+      "queued": 73,
+      "priorityPoints": 357,
+      "runtimeMs": "7.41",
+      "roomViolations": 0,
+      "overlapViolations": 0,
+      "attendeeClearanceViolations": 61
+    },
+    {
+      "policy": "Arrival order baseline",
+      "scheduled": 103,
+      "queued": 77,
+      "priorityPoints": 287,
+      "runtimeMs": "2.28",
+      "roomViolations": 0,
+      "overlapViolations": 0,
+      "attendeeClearanceViolations": 63
+    },
+    {
+      "policy": "Shortest duration first",
+      "scheduled": 107,
+      "queued": 73,
+      "priorityPoints": 295,
+      "runtimeMs": "2.96",
+      "roomViolations": 0,
+      "overlapViolations": 0,
+      "attendeeClearanceViolations": 63
+    }
+  ],
+  "computed_takeaways": {
+    "greedy_scheduled": 107,
+    "arrival_scheduled": 103,
+    "greedy_points": 357,
+    "arrival_points": 287,
+    "point_gain_pct": 24.4,
+    "attendee_clearance_violations": 61,
+    "room_violations": 0,
+    "overlap_violations": 0
+  }
+}
