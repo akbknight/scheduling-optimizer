@@ -509,6 +509,7 @@ function renderUtilizationChart(result) {
   if (utilizationChartObj) { utilizationChartObj.destroy(); utilizationChartObj = null; }
 
   const util = result.utilization;
+  const isDark = document.documentElement.getAttribute('data-theme') !== 'light';
   const textMuted = getComputedStyle(document.documentElement).getPropertyValue('--text-muted').trim();
   const border = getComputedStyle(document.documentElement).getPropertyValue('--grid-line').trim();
 
@@ -518,7 +519,7 @@ function renderUtilizationChart(result) {
       labels: util.map(r => r.name.replace(' Room','').replace(' Hall','').replace(' Suite','').replace(' Conf','')),
       datasets: [{
         data: util.map(r => r.pct),
-        backgroundColor: util.map(r => r.pct > 70 ? 'rgba(232,160,32,0.7)' : r.pct > 40 ? 'rgba(96,165,250,0.6)' : 'rgba(255,255,255,0.15)'),
+        backgroundColor: util.map(r => r.pct > 70 ? (isDark ? 'rgba(232,160,32,0.7)' : 'rgba(196,120,0,0.75)') : r.pct > 40 ? (isDark ? 'rgba(96,165,250,0.6)' : 'rgba(29,111,181,0.65)') : (isDark ? 'rgba(255,255,255,0.15)' : 'rgba(0,0,0,0.10)')),
         borderRadius: 4,
       }]
     },
