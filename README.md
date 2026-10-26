@@ -160,17 +160,21 @@ Former Computer Programmer · U.S. Department of State
 
 ---
 
-## 🔬 Algorithmic Benchmark & Baseline Comparison
+## 🔬 Algorithmic Benchmark & Baseline Comparison (5-Element Case Study)
 
-Benchmarked on a standardized 180-meeting workload with 20 rooms and 150 personnel:
+- **Question:** How does a priority-aware greedy constraint satisfaction heuristic compare to naive first-come, first-served (arrival-order) heuristic placement under shared space constraints?
+- **Evidence:** Evaluated on a deterministic synthetic benchmark instance (seed 42, 180 meeting requests, 20 facility rooms, 150 personnel across a 40-hour work week). Compared Priority-Greedy against Arrival-Order Baseline (FCFS) and Shortest-Duration-First heuristics.
+- **Result:** Priority-Greedy scheduled **107 of 180 meetings** (73 queued) versus **103 meetings** (77 queued) under arrival order (+3.9% meetings placed), serving **357 priority points versus 287** (+24.4% priority points served). Zero room-capacity, room-clearance, or double-booking schedule overlaps were detected. The heuristic executes in ~7–12 ms client-side.
+- **Recommendation:** Deploy priority-aware constraint satisfaction heuristics when request volume exceeds facility capacity to prioritize mission-critical requests into constrained resources, rather than allocating on an unweighted first-come first-served basis.
+- **Limitation:** The benchmark is explicitly a synthetic, single-instance simulation and does not establish measured real-world dollar savings, operational labor reduction, or enterprise user adoption. While facility room clearance constraints are strictly verified (0 room violations), attendee-level clearance checking remains an unresolved rule (61 of 107 scheduled meetings include an attendee below meeting clearance threshold).
 
 | Scheduling Policy | Meetings Scheduled | Requests Queued | Fill Rate (%) | Priority Points Served | Relative Gain | Runtime |
 |:---|---:|---:|---:|---:|---:|---:|
-| **Priority Greedy (Heuristic)** | **107** | 73 | **59.4%** | **357** | **+24.4%** | **7.33 ms** |
-| **Shortest Duration First** | 107 | 73 | 59.4% | 295 | +2.8% | 4.84 ms |
-| **Arrival Order Baseline (FCFS)** | 103 | 77 | 57.2% | 287 | Baseline | 6.92 ms |
+| **Priority Greedy (Heuristic)** | **107** | 73 | **59.4%** | **357** | **+24.4%** | **~7–12 ms** |
+| **Shortest Duration First** | 107 | 73 | 59.4% | 295 | +2.8% | ~5–9 ms |
+| **Arrival Order Baseline (FCFS)** | 103 | 77 | 57.2% | 287 | Baseline | ~7–12 ms |
 
-### Key Findings & Boundary:
+### Key Findings & Constraint Boundary:
 1. **Measurable Prioritization Value:** Priority-Greedy serves **24.4% more priority points** than FIFO arrival order by prioritizing high-stakes meetings into constrained premium spaces.
 2. **Hard Constraints Enforced:** Zero room-capacity, room-clearance, or schedule overlap violations.
 3. **Personnel Rule Boundary:** 61 scheduled meetings contained an attendee below meeting clearance, demonstrating that facility room clearance is enforced while attendee-level clearance rule enforcement remains a future constraint refinement.
