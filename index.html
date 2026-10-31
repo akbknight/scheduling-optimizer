@@ -360,76 +360,87 @@
     <div style="position:relative;height:220px"><canvas id="utilizationChart"></canvas></div>
   </div>
 
-  <!-- Diagnostic Conflict Breakdown -->
+    <!-- Diagnostic Conflict Breakdown -->
   <div class="chart-card">
-    <div class="chart-title">Diagnostic Bottleneck Analysis (Unscheduled Requests)</div>
-    <div class="chart-sub">Primary binding constraints preventing placement of 73 meeting requests across operating hours</div>
+    <div class="chart-title">Constraint Analysis &amp; Queuing Factors (73 Unscheduled Requests)</div>
+    <div class="chart-sub">Primary potential binding factors preventing placement across the 40-hour operational schedule</div>
     <div class="diagnostic-grid">
       <div class="diag-card">
-        <span class="diag-count">48</span>
+        <span class="diag-tag" style="font-size: 11px; font-weight: 700; color: var(--accent); text-transform: uppercase; letter-spacing: 0.05em;">Constraint Factor 01</span>
         <span class="diag-title">Attendee Schedule Collision</span>
-        <span class="diag-desc">Cross-departmental key personnel simultaneously requested in parallel diplomatic sessions.</span>
+        <span class="diag-desc">Cross-departmental key personnel simultaneously requested in parallel diplomatic sessions where attendees cannot be double-booked.</span>
       </div>
       <div class="diag-card">
-        <span class="diag-count">17</span>
+        <span class="diag-tag" style="font-size: 11px; font-weight: 700; color: var(--accent); text-transform: uppercase; letter-spacing: 0.05em;">Constraint Factor 02</span>
         <span class="diag-title">Room Capacity &amp; Clearance</span>
-        <span class="diag-desc">Large delegations (&gt;20 attendees) or Top Secret SCIF clearance required exceeds available room inventory.</span>
+        <span class="diag-desc">Large delegations (&gt;20 attendees) or Top Secret SCIF clearance requirements exceeding available physical room inventory.</span>
       </div>
       <div class="diag-card">
-        <span class="diag-count">8</span>
+        <span class="diag-tag" style="font-size: 11px; font-weight: 700; color: var(--accent); text-transform: uppercase; letter-spacing: 0.05em;">Constraint Factor 03</span>
         <span class="diag-title">Operating Hours Congestion</span>
-        <span class="diag-desc">Multi-hour sessions (90–120 min) requested near close-of-business (16:30–18:00) with insufficient continuous blocks.</span>
+        <span class="diag-desc">Multi-hour sessions (90–120 min) requested during peak operational windows with insufficient continuous blocks remaining.</span>
       </div>
     </div>
   </div>
 
-  <!-- Heuristic Algorithm Benchmark Scoreboard -->
+    <!-- Heuristic Algorithm Benchmark Scoreboard -->
   <div class="chart-card">
     <div class="chart-title">Heuristic Dispatch Comparison &amp; Benchmark Scoreboard</div>
-    <div class="chart-sub">Synthetic diplomatic operations benchmark: 20 rooms, 150 personnel, 180 meeting requests</div>
+    <div class="chart-sub">Authoritative results from reports/benchmark_results.json on deterministic synthetic benchmark (seed 42: 180 requests, 20 rooms, 150 personnel)</div>
     <div style="overflow-x:auto;">
       <table class="benchmark-table">
         <thead>
           <tr>
-            <th>Scheduling Heuristic</th>
-            <th>Queue Ordering Policy</th>
-            <th style="text-align: right;">Meetings Placed</th>
-            <th style="text-align: right;">Throughput</th>
-            <th style="text-align: right;">High-Priority Fill</th>
-            <th style="text-align: right;">Avg Utilization</th>
-            <th style="text-align: center;">Constraint Violations</th>
+            <th>Scheduling Policy</th>
+            <th>Queue Ordering Rule</th>
+            <th style="text-align: right;">Scheduled</th>
+            <th style="text-align: right;">Queued</th>
+            <th style="text-align: right;">Fill Rate</th>
+            <th style="text-align: right;">Priority Points</th>
+            <th style="text-align: right;">Relative Gain</th>
+            <th style="text-align: right;">Runtime</th>
+            <th style="text-align: center;">Constraint Verification</th>
           </tr>
         </thead>
         <tbody>
           <tr class="selected-model-row">
-            <td><strong>Priority-Greedy Dispatcher</strong></td>
+            <td><strong>Priority greedy</strong></td>
             <td>Priority Score &times; Clearance &times; Urgency</td>
-            <td style="text-align: right;" class="stat-highlight">107 / 180</td>
+            <td style="text-align: right;" class="stat-highlight">107</td>
+            <td style="text-align: right;">73</td>
             <td style="text-align: right;">59.4%</td>
-            <td style="text-align: right;">94.2%</td>
-            <td style="text-align: right;">68%</td>
-            <td style="text-align: center;"><span class="badge-active">0 (Strict Safe)</span></td>
+            <td style="text-align: right;" class="stat-highlight">357</td>
+            <td style="text-align: right;" class="stat-highlight">+24.4%</td>
+            <td style="text-align: right;">7.41 ms</td>
+            <td style="text-align: center;"><span class="badge-active">0 Overlaps / 0 Room Violations*</span></td>
           </tr>
           <tr>
-            <td><strong>First-Come, First-Served (FIFO)</strong></td>
+            <td><strong>Arrival order baseline (FIFO)</strong></td>
             <td>Arrival Timestamp Order</td>
-            <td style="text-align: right;">89 / 180</td>
-            <td style="text-align: right;">49.4%</td>
-            <td style="text-align: right;">66.2%</td>
-            <td style="text-align: right;">58%</td>
-            <td style="text-align: center;"><span class="badge-active">0 (Strict Safe)</span></td>
+            <td style="text-align: right;">103</td>
+            <td style="text-align: right;">77</td>
+            <td style="text-align: right;">57.2%</td>
+            <td style="text-align: right;">287</td>
+            <td style="text-align: right;">Baseline</td>
+            <td style="text-align: right;">2.28 ms</td>
+            <td style="text-align: center;"><span class="badge-active">0 Overlaps / 0 Room Violations*</span></td>
           </tr>
           <tr>
-            <td><strong>Random Placement Baseline</strong></td>
-            <td>Stochastic Queue Order</td>
-            <td style="text-align: right;">64 / 180</td>
-            <td style="text-align: right;">35.6%</td>
-            <td style="text-align: right;">38.1%</td>
-            <td style="text-align: right;">41%</td>
-            <td style="text-align: center;"><span class="badge-danger">42 Overlaps</span></td>
+            <td><strong>Shortest duration first</strong></td>
+            <td>Duration Ascending</td>
+            <td style="text-align: right;">107</td>
+            <td style="text-align: right;">73</td>
+            <td style="text-align: right;">59.4%</td>
+            <td style="text-align: right;">295</td>
+            <td style="text-align: right;">+2.8%</td>
+            <td style="text-align: right;">2.96 ms</td>
+            <td style="text-align: center;"><span class="badge-active">0 Overlaps / 0 Room Violations*</span></td>
           </tr>
         </tbody>
       </table>
+    </div>
+    <div style="font-size: 11px; color: var(--text-muted); margin-top: 10px; line-height: 1.5;">
+      *Note on constraint verification from <code>reports/benchmark_audit.md</code>: The scheduler strictly verifies room capacity and room clearance with zero double-booking or room classification violations. As documented in the audit, attendee-level clearance checking is an unresolved rule in the benchmark instance (61 of 107 scheduled meetings include an attendee below meeting clearance threshold).
     </div>
   </div>
 
