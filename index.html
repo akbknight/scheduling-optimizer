@@ -337,6 +337,7 @@
     </div>
     <div class="controls">
       <button class="btn btn-accent" onclick="runOptimizer()">Run Optimizer</button>
+      <button class="btn" id="clearanceToggleBtn" onclick="toggleClearancePolicy()"><span id="clearanceBtnText">Security: Strict Clearance</span></button>
       <button class="btn" id="simulateBtn" onclick="toggleSimulation()">⚡ Stress Test (250 Req)</button>
       <button class="btn" onclick="toggleTheme()">Toggle theme</button>
     </div>
@@ -386,61 +387,131 @@
     <!-- Heuristic Algorithm Benchmark Scoreboard -->
   <div class="chart-card">
     <div class="chart-title">Heuristic Dispatch Comparison &amp; Benchmark Scoreboard</div>
-    <div class="chart-sub">Authoritative results from reports/benchmark_results.json on deterministic synthetic benchmark (seed 42: 180 requests, 20 rooms, 150 personnel)</div>
+    <div class="chart-sub">Authoritative results from <code>reports/benchmark_results.json</code> across reference instance (Seed 42) and 5-instance benchmark suite</div>
     <div style="overflow-x:auto;">
       <table class="benchmark-table">
         <thead>
           <tr>
             <th>Scheduling Policy</th>
-            <th>Queue Ordering Rule</th>
+            <th>Clearance Mode</th>
             <th style="text-align: right;">Scheduled</th>
             <th style="text-align: right;">Queued</th>
             <th style="text-align: right;">Fill Rate</th>
             <th style="text-align: right;">Priority Points</th>
-            <th style="text-align: right;">Relative Gain</th>
+            <th style="text-align: right;">Attendee Violations</th>
             <th style="text-align: right;">Runtime</th>
-            <th style="text-align: center;">Constraint Verification</th>
+            <th style="text-align: center;">Constraint Status</th>
           </tr>
         </thead>
         <tbody>
           <tr class="selected-model-row">
-            <td><strong>Priority greedy</strong></td>
-            <td>Priority Score &times; Clearance &times; Urgency</td>
-            <td style="text-align: right;" class="stat-highlight">107</td>
-            <td style="text-align: right;">73</td>
-            <td style="text-align: right;">59.4%</td>
-            <td style="text-align: right;" class="stat-highlight">357</td>
-            <td style="text-align: right;" class="stat-highlight">+24.4%</td>
-            <td style="text-align: right;">7.41 ms</td>
-            <td style="text-align: center;"><span class="badge-active">0 Overlaps / 0 Room Violations*</span></td>
+            <td><strong>Priority greedy (Strict)</strong></td>
+            <td>Personnel &amp; Room Checked</td>
+            <td style="text-align: right;" class="stat-highlight">66</td>
+            <td style="text-align: right;">114</td>
+            <td style="text-align: right;">36.7%</td>
+            <td style="text-align: right;" class="stat-highlight">201</td>
+            <td style="text-align: right;" class="stat-highlight">0</td>
+            <td style="text-align: right;">2.97 ms</td>
+            <td style="text-align: center;"><span class="badge-active">Verified (0 Violations)</span></td>
           </tr>
           <tr>
-            <td><strong>Arrival order baseline (FIFO)</strong></td>
-            <td>Arrival Timestamp Order</td>
-            <td style="text-align: right;">103</td>
-            <td style="text-align: right;">77</td>
-            <td style="text-align: right;">57.2%</td>
-            <td style="text-align: right;">287</td>
-            <td style="text-align: right;">Baseline</td>
-            <td style="text-align: right;">2.28 ms</td>
-            <td style="text-align: center;"><span class="badge-active">0 Overlaps / 0 Room Violations*</span></td>
+            <td><strong>Arrival order baseline (Strict)</strong></td>
+            <td>Personnel &amp; Room Checked</td>
+            <td style="text-align: right;">67</td>
+            <td style="text-align: right;">113</td>
+            <td style="text-align: right;">37.2%</td>
+            <td style="text-align: right;">190</td>
+            <td style="text-align: right;">0</td>
+            <td style="text-align: right;">4.84 ms</td>
+            <td style="text-align: center;"><span class="badge-active">Verified (0 Violations)</span></td>
           </tr>
           <tr>
-            <td><strong>Shortest duration first</strong></td>
-            <td>Duration Ascending</td>
+            <td><strong>Shortest duration first (Strict)</strong></td>
+            <td>Personnel &amp; Room Checked</td>
+            <td style="text-align: right;">62</td>
+            <td style="text-align: right;">118</td>
+            <td style="text-align: right;">34.4%</td>
+            <td style="text-align: right;">167</td>
+            <td style="text-align: right;">0</td>
+            <td style="text-align: right;">2.32 ms</td>
+            <td style="text-align: center;"><span class="badge-active">Verified (0 Violations)</span></td>
+          </tr>
+          <tr style="opacity: 0.75;">
+            <td><strong>Priority greedy (Unconstrained)</strong></td>
+            <td>Room Clearance Only</td>
             <td style="text-align: right;">107</td>
             <td style="text-align: right;">73</td>
             <td style="text-align: right;">59.4%</td>
-            <td style="text-align: right;">295</td>
-            <td style="text-align: right;">+2.8%</td>
-            <td style="text-align: right;">2.96 ms</td>
-            <td style="text-align: center;"><span class="badge-active">0 Overlaps / 0 Room Violations*</span></td>
+            <td style="text-align: right;">357</td>
+            <td style="text-align: right; color: var(--yellow);">61</td>
+            <td style="text-align: right;">4.64 ms</td>
+            <td style="text-align: center;"><span style="color:var(--yellow);font-size:11px;">Attendee Clearance Deficit</span></td>
           </tr>
         </tbody>
       </table>
     </div>
+
+    <!-- Multi-Instance Cross-Validation Section -->
+    <div style="margin-top: 18px; border-top: 1px solid var(--border); padding-top: 14px;">
+      <div style="font-size: 12px; font-weight: 600; color: var(--text); margin-bottom: 6px;">Multi-Instance Evaluation Suite (5 Deterministic Seeds: 42, 100, 2026, 31415, 88888)</div>
+      <div style="overflow-x:auto;">
+        <table class="benchmark-table" style="font-size: 12px;">
+          <thead>
+            <tr>
+              <th>Policy Specification</th>
+              <th style="text-align: right;">Avg Scheduled</th>
+              <th style="text-align: right;">Avg Fill Rate</th>
+              <th style="text-align: right;">Avg Priority Points</th>
+              <th style="text-align: right;">Avg Attendee Violations</th>
+              <th style="text-align: right;">Room Violations</th>
+              <th style="text-align: right;">Overlap Violations</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr style="font-weight: 600;">
+              <td>Priority greedy (Strict clearance)</td>
+              <td style="text-align: right;">70.2 / 180</td>
+              <td style="text-align: right;">39.0%</td>
+              <td style="text-align: right; color: var(--accent);">220.4</td>
+              <td style="text-align: right; color: var(--green);">0.0</td>
+              <td style="text-align: right;">0.0</td>
+              <td style="text-align: right;">0.0</td>
+            </tr>
+            <tr>
+              <td>Arrival order baseline (Strict)</td>
+              <td style="text-align: right;">70.0 / 180</td>
+              <td style="text-align: right;">38.9%</td>
+              <td style="text-align: right;">208.4</td>
+              <td style="text-align: right; color: var(--green);">0.0</td>
+              <td style="text-align: right;">0.0</td>
+              <td style="text-align: right;">0.0</td>
+            </tr>
+            <tr>
+              <td>Shortest duration first (Strict)</td>
+              <td style="text-align: right;">68.6 / 180</td>
+              <td style="text-align: right;">38.1%</td>
+              <td style="text-align: right;">199.8</td>
+              <td style="text-align: right; color: var(--green);">0.0</td>
+              <td style="text-align: right;">0.0</td>
+              <td style="text-align: right;">0.0</td>
+            </tr>
+            <tr style="opacity: 0.75;">
+              <td>Priority greedy (Unconstrained)</td>
+              <td style="text-align: right;">112.8 / 180</td>
+              <td style="text-align: right;">62.7%</td>
+              <td style="text-align: right;">394.0</td>
+              <td style="text-align: right; color: var(--yellow);">59.6</td>
+              <td style="text-align: right;">0.0</td>
+              <td style="text-align: right;">0.0</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
     <div style="font-size: 11px; color: var(--text-muted); margin-top: 10px; line-height: 1.5;">
-      *Note on constraint verification from <code>reports/benchmark_audit.md</code>: The scheduler strictly verifies room capacity and room clearance with zero double-booking or room classification violations. As documented in the audit, attendee-level clearance checking is an unresolved rule in the benchmark instance (61 of 107 scheduled meetings include an attendee below meeting clearance threshold).
+      *Constraint audit verification from <code>reports/benchmark_audit.md</code>: In strict mode, the scheduler verifies both facility classification and attendee-level security clearance, guaranteeing 0 attendee clearance violations. Unconstrained mode illustrates the structural impact of omitting attendee classification checks (59.6 average personnel clearance deficits per instance).
     </div>
   </div>
 
@@ -560,9 +631,21 @@ function generateData() {
   return { personnel, rooms, meetings };
 }
 
+let enforceAttendeeClearance = true;
+
+function toggleClearancePolicy() {
+  enforceAttendeeClearance = !enforceAttendeeClearance;
+  const btnText = document.getElementById('clearanceBtnText');
+  if (btnText) {
+    btnText.textContent = enforceAttendeeClearance ? 'Security: Strict Clearance' : 'Security: Unconstrained';
+  }
+  runOptimizer();
+}
+
 // ── Scheduling Algorithm ───────────────────────────────────────────────────
 function runScheduler(data) {
-  const { meetings, rooms } = data;
+  const { meetings, rooms, personnel } = data;
+  const personnelMap = new Map((personnel || []).map(p => [p.id, p]));
 
   // Room availability: 2D array [room][slot] = meetingId or null
   const schedule = Array.from({ length: N_ROOMS }, () => new Array(TIME_SLOTS).fill(null));
@@ -574,6 +657,23 @@ function runScheduler(data) {
   let scheduled = 0, unscheduled = 0;
 
   for (const mtg of sorted) {
+    if (enforceAttendeeClearance) {
+      const uncleared = mtg.attendees.some(id => {
+        const p = personnelMap.get(id);
+        return p && p.clearance < mtg.clearance;
+      });
+      if (uncleared) {
+        results.push({
+          ...mtg, roomId: null, roomName: '—', startSlot: null, startTime: '—', endTime: '—',
+          durationLabel: mtg.duration === 1 ? '30 min' : `${mtg.duration * 30} min`,
+          status: 'queued',
+          rejectionReason: 'Attendee clearance requirement not satisfied'
+        });
+        unscheduled++;
+        continue;
+      }
+    }
+
     let found = false;
 
     // Try from preferred start, wrapping forward
@@ -656,11 +756,17 @@ function renderKPIs(result, data) {
   const avgUtil = Math.round(result.utilization.reduce((s, r) => s + r.pct, 0) / result.utilization.length);
   const conflictsResolved = result.total - result.unscheduled;
 
+  const pMap = new Map((data.personnel || []).map(p => [p.id, p]));
+  let attViolations = 0;
+  for (const m of result.results.filter(r => r.status === 'scheduled')) {
+    if (m.attendees.some(id => (pMap.get(id)?.clearance ?? 1) < m.clearance)) attViolations++;
+  }
+
   const kpis = [
     { label: 'Meetings Scheduled', value: result.scheduled, sub: `${scheduledPct}% success rate`, color: 'var(--green)' },
     { label: 'Unscheduled', value: result.unscheduled, sub: 'Queued for retry', color: result.unscheduled > 0 ? 'var(--yellow)' : 'var(--text)' },
     { label: 'Avg Room Utilization', value: avgUtil + '%', sub: `${N_ROOMS} rooms · 10 hrs`, color: avgUtil > 70 ? 'var(--accent)' : 'var(--text)' },
-    { label: 'Personnel', value: N_PERSONNEL, sub: `5 departments`, color: 'var(--text)' },
+    { label: 'Clearance Status', value: attViolations === 0 ? '0 Defects' : `${attViolations} Deficits`, sub: attViolations === 0 ? 'Strict clearance verified' : 'Personnel clearance deficit', color: attViolations === 0 ? 'var(--green)' : 'var(--yellow)' },
     { label: 'Conflicts Resolved', value: conflictsResolved, sub: 'Constraint-aware', color: 'var(--blue)' },
   ];
 

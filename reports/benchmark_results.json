@@ -1,50 +1,354 @@
 {
-  "benchmark_instance": {
+  "benchmark_instance_seed42": {
     "seed": 42,
     "meetings": 180,
     "rooms": 20,
-    "personnel": 150
+    "personnel": 150,
+    "results": [
+      {
+        "policy": "Priority greedy (Unconstrained)",
+        "strictClearance": false,
+        "scheduled": 107,
+        "queued": 73,
+        "priorityPoints": 357,
+        "runtimeMs": 12.83,
+        "roomViolations": 0,
+        "overlapViolations": 0,
+        "attendeeClearanceViolations": 61
+      },
+      {
+        "policy": "Priority greedy (Strict clearance)",
+        "strictClearance": true,
+        "scheduled": 66,
+        "queued": 114,
+        "priorityPoints": 201,
+        "runtimeMs": 7.89,
+        "roomViolations": 0,
+        "overlapViolations": 0,
+        "attendeeClearanceViolations": 0
+      },
+      {
+        "policy": "Arrival order baseline (Strict)",
+        "strictClearance": true,
+        "scheduled": 67,
+        "queued": 113,
+        "priorityPoints": 190,
+        "runtimeMs": 5.18,
+        "roomViolations": 0,
+        "overlapViolations": 0,
+        "attendeeClearanceViolations": 0
+      },
+      {
+        "policy": "Shortest duration first (Strict)",
+        "strictClearance": true,
+        "scheduled": 62,
+        "queued": 118,
+        "priorityPoints": 167,
+        "runtimeMs": 3.68,
+        "roomViolations": 0,
+        "overlapViolations": 0,
+        "attendeeClearanceViolations": 0
+      }
+    ]
   },
-  "policy_results": [
-    {
-      "policy": "Priority greedy",
-      "scheduled": 107,
-      "queued": 73,
-      "priorityPoints": 357,
-      "runtimeMs": "7.41",
-      "roomViolations": 0,
-      "overlapViolations": 0,
-      "attendeeClearanceViolations": 61
-    },
-    {
-      "policy": "Arrival order baseline",
-      "scheduled": 103,
-      "queued": 77,
-      "priorityPoints": 287,
-      "runtimeMs": "2.28",
-      "roomViolations": 0,
-      "overlapViolations": 0,
-      "attendeeClearanceViolations": 63
-    },
-    {
-      "policy": "Shortest duration first",
-      "scheduled": 107,
-      "queued": 73,
-      "priorityPoints": 295,
-      "runtimeMs": "2.96",
-      "roomViolations": 0,
-      "overlapViolations": 0,
-      "attendeeClearanceViolations": 63
+  "multi_instance_benchmark": {
+    "seeds": [
+      42,
+      100,
+      2026,
+      31415,
+      88888
+    ],
+    "aggregates": [
+      {
+        "policy": "Priority greedy (Unconstrained)",
+        "strictClearance": false,
+        "avgScheduled": 112.8,
+        "avgQueued": 67.2,
+        "avgFillRatePct": 62.7,
+        "avgPriorityPoints": 394,
+        "avgAttendeeClearanceViolations": 59.6,
+        "avgRoomViolations": 0,
+        "avgOverlapViolations": 0,
+        "avgRuntimeMs": 5.14
+      },
+      {
+        "policy": "Priority greedy (Strict clearance)",
+        "strictClearance": true,
+        "avgScheduled": 70.2,
+        "avgQueued": 109.8,
+        "avgFillRatePct": 39,
+        "avgPriorityPoints": 220.4,
+        "avgAttendeeClearanceViolations": 0,
+        "avgRoomViolations": 0,
+        "avgOverlapViolations": 0,
+        "avgRuntimeMs": 1.9
+      },
+      {
+        "policy": "Arrival order baseline (Strict)",
+        "strictClearance": true,
+        "avgScheduled": 70,
+        "avgQueued": 110,
+        "avgFillRatePct": 38.9,
+        "avgPriorityPoints": 208.4,
+        "avgAttendeeClearanceViolations": 0,
+        "avgRoomViolations": 0,
+        "avgOverlapViolations": 0,
+        "avgRuntimeMs": 1.95
+      },
+      {
+        "policy": "Shortest duration first (Strict)",
+        "strictClearance": true,
+        "avgScheduled": 68.6,
+        "avgQueued": 111.4,
+        "avgFillRatePct": 38.1,
+        "avgPriorityPoints": 199.8,
+        "avgAttendeeClearanceViolations": 0,
+        "avgRoomViolations": 0,
+        "avgOverlapViolations": 0,
+        "avgRuntimeMs": 1.22
+      }
+    ],
+    "per_seed_runs": {
+      "42": [
+        {
+          "policy": "Priority greedy (Unconstrained)",
+          "strictClearance": false,
+          "scheduled": 107,
+          "queued": 73,
+          "priorityPoints": 357,
+          "runtimeMs": 10.88,
+          "roomViolations": 0,
+          "overlapViolations": 0,
+          "attendeeClearanceViolations": 61
+        },
+        {
+          "policy": "Priority greedy (Strict clearance)",
+          "strictClearance": true,
+          "scheduled": 66,
+          "queued": 114,
+          "priorityPoints": 201,
+          "runtimeMs": 4.08,
+          "roomViolations": 0,
+          "overlapViolations": 0,
+          "attendeeClearanceViolations": 0
+        },
+        {
+          "policy": "Arrival order baseline (Strict)",
+          "strictClearance": true,
+          "scheduled": 67,
+          "queued": 113,
+          "priorityPoints": 190,
+          "runtimeMs": 3.5,
+          "roomViolations": 0,
+          "overlapViolations": 0,
+          "attendeeClearanceViolations": 0
+        },
+        {
+          "policy": "Shortest duration first (Strict)",
+          "strictClearance": true,
+          "scheduled": 62,
+          "queued": 118,
+          "priorityPoints": 167,
+          "runtimeMs": 0.76,
+          "roomViolations": 0,
+          "overlapViolations": 0,
+          "attendeeClearanceViolations": 0
+        }
+      ],
+      "100": [
+        {
+          "policy": "Priority greedy (Unconstrained)",
+          "strictClearance": false,
+          "scheduled": 121,
+          "queued": 59,
+          "priorityPoints": 429,
+          "runtimeMs": 1.78,
+          "roomViolations": 0,
+          "overlapViolations": 0,
+          "attendeeClearanceViolations": 59
+        },
+        {
+          "policy": "Priority greedy (Strict clearance)",
+          "strictClearance": true,
+          "scheduled": 74,
+          "queued": 106,
+          "priorityPoints": 245,
+          "runtimeMs": 0.91,
+          "roomViolations": 0,
+          "overlapViolations": 0,
+          "attendeeClearanceViolations": 0
+        },
+        {
+          "policy": "Arrival order baseline (Strict)",
+          "strictClearance": true,
+          "scheduled": 75,
+          "queued": 105,
+          "priorityPoints": 236,
+          "runtimeMs": 0.95,
+          "roomViolations": 0,
+          "overlapViolations": 0,
+          "attendeeClearanceViolations": 0
+        },
+        {
+          "policy": "Shortest duration first (Strict)",
+          "strictClearance": true,
+          "scheduled": 73,
+          "queued": 107,
+          "priorityPoints": 226,
+          "runtimeMs": 0.71,
+          "roomViolations": 0,
+          "overlapViolations": 0,
+          "attendeeClearanceViolations": 0
+        }
+      ],
+      "2026": [
+        {
+          "policy": "Priority greedy (Unconstrained)",
+          "strictClearance": false,
+          "scheduled": 118,
+          "queued": 62,
+          "priorityPoints": 413,
+          "runtimeMs": 3.33,
+          "roomViolations": 0,
+          "overlapViolations": 0,
+          "attendeeClearanceViolations": 72
+        },
+        {
+          "policy": "Priority greedy (Strict clearance)",
+          "strictClearance": true,
+          "scheduled": 62,
+          "queued": 118,
+          "priorityPoints": 195,
+          "runtimeMs": 1.3,
+          "roomViolations": 0,
+          "overlapViolations": 0,
+          "attendeeClearanceViolations": 0
+        },
+        {
+          "policy": "Arrival order baseline (Strict)",
+          "strictClearance": true,
+          "scheduled": 63,
+          "queued": 117,
+          "priorityPoints": 192,
+          "runtimeMs": 1.45,
+          "roomViolations": 0,
+          "overlapViolations": 0,
+          "attendeeClearanceViolations": 0
+        },
+        {
+          "policy": "Shortest duration first (Strict)",
+          "strictClearance": true,
+          "scheduled": 62,
+          "queued": 118,
+          "priorityPoints": 179,
+          "runtimeMs": 1.88,
+          "roomViolations": 0,
+          "overlapViolations": 0,
+          "attendeeClearanceViolations": 0
+        }
+      ],
+      "31415": [
+        {
+          "policy": "Priority greedy (Unconstrained)",
+          "strictClearance": false,
+          "scheduled": 105,
+          "queued": 75,
+          "priorityPoints": 376,
+          "runtimeMs": 4.1,
+          "roomViolations": 0,
+          "overlapViolations": 0,
+          "attendeeClearanceViolations": 56
+        },
+        {
+          "policy": "Priority greedy (Strict clearance)",
+          "strictClearance": true,
+          "scheduled": 69,
+          "queued": 111,
+          "priorityPoints": 212,
+          "runtimeMs": 1.38,
+          "roomViolations": 0,
+          "overlapViolations": 0,
+          "attendeeClearanceViolations": 0
+        },
+        {
+          "policy": "Arrival order baseline (Strict)",
+          "strictClearance": true,
+          "scheduled": 67,
+          "queued": 113,
+          "priorityPoints": 198,
+          "runtimeMs": 2.29,
+          "roomViolations": 0,
+          "overlapViolations": 0,
+          "attendeeClearanceViolations": 0
+        },
+        {
+          "policy": "Shortest duration first (Strict)",
+          "strictClearance": true,
+          "scheduled": 68,
+          "queued": 112,
+          "priorityPoints": 197,
+          "runtimeMs": 1.06,
+          "roomViolations": 0,
+          "overlapViolations": 0,
+          "attendeeClearanceViolations": 0
+        }
+      ],
+      "88888": [
+        {
+          "policy": "Priority greedy (Unconstrained)",
+          "strictClearance": false,
+          "scheduled": 113,
+          "queued": 67,
+          "priorityPoints": 395,
+          "runtimeMs": 5.61,
+          "roomViolations": 0,
+          "overlapViolations": 0,
+          "attendeeClearanceViolations": 50
+        },
+        {
+          "policy": "Priority greedy (Strict clearance)",
+          "strictClearance": true,
+          "scheduled": 80,
+          "queued": 100,
+          "priorityPoints": 249,
+          "runtimeMs": 1.83,
+          "roomViolations": 0,
+          "overlapViolations": 0,
+          "attendeeClearanceViolations": 0
+        },
+        {
+          "policy": "Arrival order baseline (Strict)",
+          "strictClearance": true,
+          "scheduled": 78,
+          "queued": 102,
+          "priorityPoints": 226,
+          "runtimeMs": 1.56,
+          "roomViolations": 0,
+          "overlapViolations": 0,
+          "attendeeClearanceViolations": 0
+        },
+        {
+          "policy": "Shortest duration first (Strict)",
+          "strictClearance": true,
+          "scheduled": 78,
+          "queued": 102,
+          "priorityPoints": 230,
+          "runtimeMs": 1.71,
+          "roomViolations": 0,
+          "overlapViolations": 0,
+          "attendeeClearanceViolations": 0
+        }
+      ]
     }
-  ],
+  },
   "computed_takeaways": {
-    "greedy_scheduled": 107,
-    "arrival_scheduled": 103,
-    "greedy_points": 357,
-    "arrival_points": 287,
-    "point_gain_pct": 24.4,
-    "attendee_clearance_violations": 61,
-    "room_violations": 0,
-    "overlap_violations": 0
+    "greedy_unconstrained_violations": 61,
+    "greedy_strict_violations": 0,
+    "multi_avg_strict_violations": 0,
+    "single_point_gain_pct": 5.8,
+    "multi_point_gain_pct": 5.8,
+    "unconstrained_avg_scheduled": 112.8,
+    "strict_avg_scheduled": 70.2
   }
 }

@@ -57,8 +57,11 @@ function slotToTime(slot) {
  * @param {object} config - SCHEDULER_CONFIG
  * @returns {{ personnel: object[], rooms: object[], meetings: object[] }}
  */
-function generateData(config) {
+function generateData(config, seed = 42) {
   const { departments, roomNames, meetingTypes, timeSlots, nMeetings, nPersonnel } = config;
+  const rng = mulberry32(seed);
+  const randInt = (min, max) => Math.floor(rng() * (max - min + 1)) + min;
+  const pick = (arr) => arr[Math.floor(rng() * arr.length)];
 
   const personnel = Array.from({ length: nPersonnel }, (_, i) => ({
     id:        i,
@@ -81,7 +84,7 @@ function generateData(config) {
     const attendees     = [];
     const pool          = [...deptPersonnel];
     for (let j = 0; j < attendeeCount && pool.length > 0; j++) {
-      const idx = Math.floor(_rng() * pool.length);
+      const idx = Math.floor(rng() * pool.length);
       attendees.push(pool[idx].id);
       pool.splice(idx, 1);
     }
@@ -98,7 +101,7 @@ function generateData(config) {
     };
   });
 
-  return { personnel, rooms, meetings };
+  return { personnel, rooms, meetings, seed };
 }
 
 /* ── Core scheduler ──────────────────────────────────────────────────────── */
@@ -119,8 +122,10 @@ function generateData(config) {
  * }}
  */
 function runScheduler(data, config) {
-  const { meetings, rooms } = data;
+  const { meetings, rooms, personnel } = data;
   const { nRooms, timeSlots: TIME_SLOTS } = config;
+  const enforceAttendeeClearance = Boolean(config && config.enforceAttendeeClearance);
+  const personnelMap = new Map((personnel || []).map(p => [p.id, p]));
 
   // Room schedule matrix: [roomIndex][slotIndex] = meetingId or null
   const schedule = Array.from({ length: nRooms }, () => new Array(TIME_SLOTS).fill(null));
@@ -136,6 +141,29 @@ function runScheduler(data, config) {
   let   unscheduled = 0;
 
   for (const mtg of sorted) {
+    // Hard constraint: attendee clearance enforcement
+    if (enforceAttendeeClearance) {
+      const uncleared = mtg.attendees.some(id => {
+        const p = personnelMap.get(id);
+        return p && p.clearance < mtg.clearance;
+      });
+      if (uncleared) {
+        results.push({
+          ...mtg,
+          roomId:        null,
+          roomName:      '—',
+          startSlot:     null,
+          startTime:     '—',
+          endTime:       '—',
+          durationLabel: mtg.duration === 1 ? '30 min' : `${mtg.duration * 30} min`,
+          status:        'queued',
+          rejectionReason: 'Attendee clearance requirement not satisfied',
+        });
+        unscheduled++;
+        continue;
+      }
+    }
+
     let found = false;
 
     for (let offset = 0; offset < TIME_SLOTS && !found; offset++) {
