@@ -33,10 +33,10 @@ Evaluated on Seed 42 (180 meeting requests, 20 rooms, 150 personnel):
 
 | Scheduling Policy | Meetings Scheduled | Requests Queued | Fill Rate (%) | Priority Points | Attendee Violations | Room Violations | Overlap Violations | Runtime |
 |:---|---:|---:|---:|---:|---:|---:|---:|---:|
-| Priority greedy (Unconstrained) | 107 | 73 | 59.4% | 357 | 61 | 0 | 0 | ~6.79 ms |
-| **Priority greedy (Strict clearance)** | **66** | 114 | 36.7% | **201** | 0 | 0 | 0 | ~4.5 ms |
-| Arrival order baseline (Strict) | 67 | 113 | 37.2% | 190 | 0 | 0 | 0 | ~4.21 ms |
-| Shortest duration first (Strict) | 62 | 118 | 34.4% | 167 | 0 | 0 | 0 | ~2.43 ms |
+| Priority greedy (Unconstrained) | 107 | 73 | 59.4% | 357 | 61 | 0 | 0 | ~5.87 ms |
+| **Priority greedy (Strict clearance)** | **66** | 114 | 36.7% | **201** | 0 | 0 | 0 | ~3.87 ms |
+| Arrival order baseline (Strict) | 67 | 113 | 37.2% | 190 | 0 | 0 | 0 | ~2.05 ms |
+| Shortest duration first (Strict) | 62 | 118 | 34.4% | 167 | 0 | 0 | 0 | ~1.19 ms |
 
 ---
 
@@ -46,10 +46,10 @@ Evaluated across 5 deterministic pseudo-random seeds (42, 100, 2026, 31415, 8888
 
 | Scheduling Policy | Avg Scheduled | Avg Queued | Avg Fill Rate | Avg Priority Points | Avg Attendee Violations | Avg Room Violations | Avg Overlap Violations | Avg Runtime |
 |:---|---:|---:|---:|---:|---:|---:|---:|---:|
-| Priority greedy (Unconstrained) | 112.8 | 67.2 | 62.7% | 394 | 59.6 | 0 | 0 | ~4.26 ms |
-| **Priority greedy (Strict clearance)** | **70.2** | 109.8 | 39% | **220.4** | 0 | 0 | 0 | ~1.72 ms |
-| Arrival order baseline (Strict) | 70 | 110 | 38.9% | 208.4 | 0 | 0 | 0 | ~1.62 ms |
-| Shortest duration first (Strict) | 68.6 | 111.4 | 38.1% | 199.8 | 0 | 0 | 0 | ~1.2 ms |
+| Priority greedy (Unconstrained) | 112.8 | 67.2 | 62.7% | 394 | 59.6 | 0 | 0 | ~2.28 ms |
+| **Priority greedy (Strict clearance)** | **70.2** | 109.8 | 39% | **220.4** | 0 | 0 | 0 | ~1.27 ms |
+| Arrival order baseline (Strict) | 70 | 110 | 38.9% | 208.4 | 0 | 0 | 0 | ~0.93 ms |
+| Shortest duration first (Strict) | 68.6 | 111.4 | 38.1% | 199.8 | 0 | 0 | 0 | ~0.83 ms |
 
 ---
 

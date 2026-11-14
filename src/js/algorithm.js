@@ -22,8 +22,8 @@
  *   N = meetings (180), T = time slots (20), R = rooms (20), A = attendees per meeting (2–12)
  *   Worst case ~180 × 20 × 20 × 12 = 864,000 iterations — runs in < 5 ms client-side.
  *
- * NOTE: This file is a reference extraction. index.html is self-contained.
- * See docs/methodology.md for full algorithm documentation.
+ * NOTE: Shared implementation loaded by index.html in the browser and required
+ * by Node.js test suites. See docs/methodology.md for full algorithm documentation.
  */
 
 /* ── Seeded RNG (mulberry32) ─────────────────────────────────────────────── */
@@ -54,33 +54,49 @@ function slotToTime(slot) {
  * Creates synthetic personnel, rooms, and meeting requests using the seeded RNG.
  * Calling this with the same seed (42) always returns identical data.
  *
- * @param {object} config - SCHEDULER_CONFIG
+ * @param {object} [config] - SCHEDULER_CONFIG or override options
+ * @param {number} [seed=42] - random seed
  * @returns {{ personnel: object[], rooms: object[], meetings: object[] }}
  */
 function generateData(config, seed = 42) {
-  const { departments, roomNames, meetingTypes, timeSlots, nMeetings, nPersonnel } = config;
+  const cfg = config || (typeof SCHEDULER_CONFIG !== 'undefined' ? SCHEDULER_CONFIG : {});
+  const departments = cfg.departments || (typeof DEPARTMENTS !== 'undefined' ? DEPARTMENTS : ['State', 'Consular', 'Admin', 'Security', 'Protocol']);
+  const roomNames = cfg.roomNames || (typeof ROOM_NAMES !== 'undefined' ? ROOM_NAMES : [
+    'Roosevelt Room', 'Lincoln Room',   'Jefferson Hall',  'Hamilton Suite', 'Monroe Conf',
+    'Adams Room',     'Madison Hall',   'Washington Conf', 'Jackson Suite',  'Tyler Room',
+    'Polk Hall',      'Taylor Suite',   'Fillmore Conf',   'Pierce Room',    'Buchanan Hall',
+    'Johnson Suite',  'Grant Room',     'Hayes Conf',      'Garfield Hall',  'Arthur Suite',
+  ]);
+  const meetingTypes = cfg.meetingTypes || (typeof MEETING_TYPES !== 'undefined' ? MEETING_TYPES : [
+    'Briefing', 'Review', 'Negotiation', 'Working Group', 'Consular Session',
+    'Security Brief', 'Protocol Meeting', 'Press Conf', 'Training', 'Ops Meeting',
+  ]);
+  const timeSlots = cfg.timeSlots || (typeof TIME_SLOTS !== 'undefined' ? TIME_SLOTS : 20);
+  const nMeetings = cfg.nMeetings || (typeof N_MEETINGS !== 'undefined' ? N_MEETINGS : 180);
+  const nPersonnel = cfg.nPersonnel || (typeof N_PERSONNEL !== 'undefined' ? N_PERSONNEL : 150);
+
   const rng = mulberry32(seed);
-  const randInt = (min, max) => Math.floor(rng() * (max - min + 1)) + min;
-  const pick = (arr) => arr[Math.floor(rng() * arr.length)];
+  const rInt = (min, max) => Math.floor(rng() * (max - min + 1)) + min;
+  const rPick = (arr) => arr[Math.floor(rng() * arr.length)];
 
   const personnel = Array.from({ length: nPersonnel }, (_, i) => ({
     id:        i,
     name:      `Personnel ${i + 1}`,
     dept:      departments[i % departments.length],
-    clearance: randInt(1, 5),
+    clearance: rInt(1, 5),
   }));
 
   const rooms = roomNames.map((name, i) => ({
     id:        i,
     name,
-    capacity:  randInt(6, 30),
-    clearance: randInt(1, 5),
+    capacity:  rInt(6, 30),
+    clearance: rInt(1, 5),
   }));
 
   const meetings = Array.from({ length: nMeetings }, (_, i) => {
-    const dept         = pick(departments);
+    const dept         = rPick(departments);
     const deptPersonnel = personnel.filter(p => p.dept === dept);
-    const attendeeCount = randInt(2, Math.min(12, deptPersonnel.length));
+    const attendeeCount = rInt(2, Math.min(12, deptPersonnel.length));
     const attendees     = [];
     const pool          = [...deptPersonnel];
     for (let j = 0; j < attendeeCount && pool.length > 0; j++) {
@@ -90,14 +106,14 @@ function generateData(config, seed = 42) {
     }
     return {
       id:             i,
-      title:          `${pick(meetingTypes)} ${i + 1}`,
+      title:          `${rPick(meetingTypes)} ${i + 1}`,
       dept,
-      priority:       randInt(1, 5),
-      duration:       pick([1, 1, 1, 2, 2, 3, 4]), // in 30-min slots
-      clearance:      randInt(1, 3),
+      priority:       rInt(1, 5),
+      duration:       rPick([1, 1, 1, 2, 2, 3, 4]), // in 30-min slots
+      clearance:      rInt(1, 3),
       attendees,
       attendeeCount:  attendees.length,
-      preferredStart: randInt(0, timeSlots - 4),
+      preferredStart: rInt(0, timeSlots - 4),
     };
   });
 
@@ -143,9 +159,15 @@ function validateAttendee(id, requiredClearance, personnelMap) {
  * }}
  */
 function runScheduler(data, config) {
+  const cfg = config || (typeof SCHEDULER_CONFIG !== 'undefined' ? SCHEDULER_CONFIG : {});
   const { meetings, rooms, personnel } = data;
-  const { nRooms, timeSlots: TIME_SLOTS } = config;
-  const enforceAttendeeClearance = Boolean(config && config.enforceAttendeeClearance);
+  const nRooms = (cfg && cfg.nRooms) || (rooms ? rooms.length : 20);
+  const TIME_SLOTS = (cfg && (cfg.timeSlots || cfg.TIME_SLOTS)) || 20;
+  const enforceAttendeeClearance = cfg && typeof cfg.enforceAttendeeClearance !== 'undefined'
+    ? Boolean(cfg.enforceAttendeeClearance)
+    : (typeof window !== 'undefined' && typeof window.enforceAttendeeClearance !== 'undefined'
+      ? Boolean(window.enforceAttendeeClearance)
+      : true);
   const personnelMap = new Map((personnel || []).map(p => [p.id, p]));
 
   // Room schedule matrix: [roomIndex][slotIndex] = meetingId or null
