@@ -104,6 +104,27 @@ function generateData(config, seed = 42) {
   return { personnel, rooms, meetings, seed };
 }
 
+/**
+ * Validation helpers for strict attendee clearance enforcement
+ */
+function isValidClearance(val) {
+  return typeof val === 'number' && Number.isFinite(val) && val >= 1;
+}
+
+function validateAttendee(id, requiredClearance, personnelMap) {
+  if (!personnelMap.has(id)) {
+    return { valid: false, reason: `Unknown attendee ID (${id}) not in personnel directory` };
+  }
+  const person = personnelMap.get(id);
+  if (!person || !isValidClearance(person.clearance)) {
+    return { valid: false, reason: `Missing, invalid, or non-finite clearance (${person?.clearance}) for attendee ${id}` };
+  }
+  if (person.clearance < requiredClearance) {
+    return { valid: false, reason: `Clearance deficit: attendee ${id} has clearance ${person.clearance}, requires ${requiredClearance}` };
+  }
+  return { valid: true };
+}
+
 /* ── Core scheduler ──────────────────────────────────────────────────────── */
 /**
  * runScheduler(data, config)
@@ -141,13 +162,17 @@ function runScheduler(data, config) {
   let   unscheduled = 0;
 
   for (const mtg of sorted) {
-    // Hard constraint: attendee clearance enforcement
+    // Hard constraint: strict attendee clearance enforcement
     if (enforceAttendeeClearance) {
-      const uncleared = mtg.attendees.some(id => {
-        const p = personnelMap.get(id);
-        return p && p.clearance < mtg.clearance;
-      });
-      if (uncleared) {
+      let attendeeRejectionReason = null;
+      for (const id of mtg.attendees) {
+        const v = validateAttendee(id, mtg.clearance, personnelMap);
+        if (!v.valid) {
+          attendeeRejectionReason = v.reason;
+          break;
+        }
+      }
+      if (attendeeRejectionReason) {
         results.push({
           ...mtg,
           roomId:        null,
@@ -157,7 +182,7 @@ function runScheduler(data, config) {
           endTime:       '—',
           durationLabel: mtg.duration === 1 ? '30 min' : `${mtg.duration * 30} min`,
           status:        'queued',
-          rejectionReason: 'Attendee clearance requirement not satisfied',
+          rejectionReason: attendeeRejectionReason,
         });
         unscheduled++;
         continue;
@@ -251,5 +276,5 @@ function runScheduler(data, config) {
 
 // CommonJS export for test harness
 if (typeof module !== 'undefined' && module.exports) {
-  module.exports = { generateData, runScheduler, slotToTime, mulberry32 };
+  module.exports = { generateData, runScheduler, slotToTime, mulberry32, validateAttendee, isValidClearance };
 }

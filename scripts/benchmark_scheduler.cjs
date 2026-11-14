@@ -9,7 +9,7 @@ const path = require('node:path');
 const fs = require('node:fs');
 const base = path.resolve(__dirname, '..');
 const config = require(path.join(base, 'src/js/config.js'));
-const { generateData, runScheduler } = require(path.join(base, 'src/js/algorithm.js'));
+const { generateData, runScheduler, validateAttendee, isValidClearance } = require(path.join(base, 'src/js/algorithm.js'));
 
 function checkConstraints(out, data) {
   let attendeeClearanceViolations = 0, roomViolations = 0, overlapViolations = 0;
@@ -21,7 +21,8 @@ function checkConstraints(out, data) {
     if (r.capacity < m.attendees.length || r.clearance < m.clearance) {
       roomViolations++;
     }
-    if (m.attendees.some(id => (pMap.get(id)?.clearance ?? 1) < m.clearance)) {
+    // Strict audit: reject unknown attendee IDs, missing, non-finite, or deficit clearances
+    if (m.attendees.some(id => !validateAttendee(id, m.clearance, pMap).valid)) {
       attendeeClearanceViolations++;
     }
     for (let s = m.startSlot; s < m.startSlot + m.duration; s++) {
@@ -153,7 +154,8 @@ function runBenchmark() {
   console.log(`   Across all 5 multi-instance seeds, strict mode maintained exactly 0.0 attendee violations.`);
   console.log(`2. Single Instance (Seed 42): Strict Priority-Greedy served ${greedyStrict.priorityPoints} pts vs ${arrivalStrict.priorityPoints} for Arrival Order (+${singlePointGainPct}% gain).`);
   console.log(`3. Multi-Instance (5 Seeds): Strict Priority-Greedy averaged ${multiGreedyStrict.avgPriorityPoints} pts vs ${multiArrivalStrict.avgPriorityPoints} pts (+${multiPointGainPct}% gain).`);
-  console.log(`4. Trade-off: Enforcing attendee security clearance reduces scheduled meetings from 107 to 66 on Seed 42 (and 112.8 to 70.2 across 5 seeds), revealing that 42.6 meetings/instance had requested personnel without proper classification.`);
+  console.log(`4. Trade-off vs Placement: Measured clearance deficits average 59.6 per instance (61 on Seed 42). Enforcing strict clearance reduces scheduled placements from 112.8 to 70.2 (a delta of 42.6 placements, and 107 to 66 = 41 on Seed 42).`);
+  console.log(`   Note: The 42.6 placement difference is a cascading heuristic room/slot contention effect across the schedule, NOT proof that exactly 42.6 meetings had clearance deficits.`);
 
   // Save structured output
   const reportsDir = path.join(base, 'reports');
@@ -235,7 +237,7 @@ function syncSchedulerReport(res, reportPath) {
      - **Priority-Greedy (Strict):** Placed an average of **${c.strict_avg_scheduled} meetings** (${multi.aggregates.find(r => r.policy === 'Priority greedy (Strict clearance)').avgFillRatePct}% fill rate) and served **${multi.aggregates.find(r => r.policy === 'Priority greedy (Strict clearance)').avgPriorityPoints} priority points**.
      - **Arrival-Order Baseline (Strict):** Placed an average of **${multi.aggregates.find(r => r.policy === 'Arrival order baseline (Strict)').avgScheduled} meetings** and served **${multi.aggregates.find(r => r.policy === 'Arrival order baseline (Strict)').avgPriorityPoints} priority points**.
      - Priority-Greedy achieved a **+${c.multi_point_gain_pct}% average priority point advantage** over arrival order under strict security constraints.
-  3. **Capacity Trade-off:** Enforcing strict attendee clearance reduced average scheduled meetings from ${c.unconstrained_avg_scheduled} (unconstrained) to ${c.strict_avg_scheduled} (strict). This demonstrates that ~42.6 meeting requests per instance had requested attendees whose security clearance was below the meeting classification threshold, identifying attendee clearance deficits as a primary operational bottleneck.
+  3. **Capacity Trade-off vs. Placement Delta:** In unconstrained mode, an average of **59.6 meeting requests per instance** (and 61 on Seed 42) directly contained attendees with clearance deficits. Enforcing strict attendee clearance reduced average scheduled placements from ${c.unconstrained_avg_scheduled} to ${c.strict_avg_scheduled} (a net delta of **42.6 scheduled placements**, and 41 on Seed 42). This 42.6 placement difference is caused by downstream cascading heuristic room and timeslot contention dynamics (as queued requests shift slot competition for remaining meetings), and is distinct from the measured count of 59.6 clearance deficits.
 - **Recommendation:** Deploy strict attendee clearance checks at intake. Prioritize meeting requests via weighted priority scoring to maximize high-classification diplomatic outcomes under facility and security constraints.
 - **Limitation:** The benchmark is evaluated on synthetic consular scheduling distributions and does not reflect real-time last-minute cancellation volatility, variable attendee travel times, or ad-hoc VIP room overrides.
 

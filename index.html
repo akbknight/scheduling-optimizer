@@ -511,7 +511,7 @@
     </div>
 
     <div style="font-size: 11px; color: var(--text-muted); margin-top: 10px; line-height: 1.5;">
-      *Constraint audit verification from <code>reports/benchmark_audit.md</code>: In strict mode, the scheduler verifies both facility classification and attendee-level security clearance, guaranteeing 0 attendee clearance violations. Unconstrained mode illustrates the structural impact of omitting attendee classification checks (59.6 average personnel clearance deficits per instance).
+      *Constraint audit verification from <code>reports/benchmark_audit.md</code>: In strict mode, the scheduler verifies facility classification and attendee-level security credentials, rejecting unknown IDs, missing/non-finite clearances, and clearance deficits (guaranteeing 0 attendee violations). In unconstrained mode, an average of 59.6 requests per instance had clearance deficits (61 on Seed 42). Enforcing strict clearance reduces average scheduled placements from 112.8 to 70.2 (a delta of 42.6 placements). This 42.6 placement difference is a cascading room/slot contention effect across the schedule, distinct from the measured count of 59.6 clearance deficits.
     </div>
   </div>
 
@@ -643,6 +643,24 @@ function toggleClearancePolicy() {
 }
 
 // ── Scheduling Algorithm ───────────────────────────────────────────────────
+function isValidClearance(val) {
+  return typeof val === 'number' && Number.isFinite(val) && val >= 1;
+}
+
+function validateAttendee(id, requiredClearance, personnelMap) {
+  if (!personnelMap.has(id)) {
+    return { valid: false, reason: `Unknown attendee ID (${id}) not in personnel directory` };
+  }
+  const person = personnelMap.get(id);
+  if (!person || !isValidClearance(person.clearance)) {
+    return { valid: false, reason: `Missing, invalid, or non-finite clearance (${person?.clearance}) for attendee ${id}` };
+  }
+  if (person.clearance < requiredClearance) {
+    return { valid: false, reason: `Clearance deficit: attendee ${id} has clearance ${person.clearance}, requires ${requiredClearance}` };
+  }
+  return { valid: true };
+}
+
 function runScheduler(data) {
   const { meetings, rooms, personnel } = data;
   const personnelMap = new Map((personnel || []).map(p => [p.id, p]));
@@ -658,16 +676,20 @@ function runScheduler(data) {
 
   for (const mtg of sorted) {
     if (enforceAttendeeClearance) {
-      const uncleared = mtg.attendees.some(id => {
-        const p = personnelMap.get(id);
-        return p && p.clearance < mtg.clearance;
-      });
-      if (uncleared) {
+      let attendeeRejectionReason = null;
+      for (const id of mtg.attendees) {
+        const v = validateAttendee(id, mtg.clearance, personnelMap);
+        if (!v.valid) {
+          attendeeRejectionReason = v.reason;
+          break;
+        }
+      }
+      if (attendeeRejectionReason) {
         results.push({
           ...mtg, roomId: null, roomName: '—', startSlot: null, startTime: '—', endTime: '—',
           durationLabel: mtg.duration === 1 ? '30 min' : `${mtg.duration * 30} min`,
           status: 'queued',
-          rejectionReason: 'Attendee clearance requirement not satisfied'
+          rejectionReason: attendeeRejectionReason
         });
         unscheduled++;
         continue;
@@ -759,7 +781,7 @@ function renderKPIs(result, data) {
   const pMap = new Map((data.personnel || []).map(p => [p.id, p]));
   let attViolations = 0;
   for (const m of result.results.filter(r => r.status === 'scheduled')) {
-    if (m.attendees.some(id => (pMap.get(id)?.clearance ?? 1) < m.clearance)) attViolations++;
+    if (m.attendees.some(id => !validateAttendee(id, m.clearance, pMap).valid)) attViolations++;
   }
 
   const kpis = [

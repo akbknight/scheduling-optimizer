@@ -21,7 +21,7 @@
      - **Priority-Greedy (Strict):** Placed an average of **70.2 meetings** (39% fill rate) and served **220.4 priority points**.
      - **Arrival-Order Baseline (Strict):** Placed an average of **70 meetings** and served **208.4 priority points**.
      - Priority-Greedy achieved a **+5.8% average priority point advantage** over arrival order under strict security constraints.
-  3. **Capacity Trade-off:** Enforcing strict attendee clearance reduced average scheduled meetings from 112.8 (unconstrained) to 70.2 (strict). This demonstrates that ~42.6 meeting requests per instance had requested attendees whose security clearance was below the meeting classification threshold, identifying attendee clearance deficits as a primary operational bottleneck.
+  3. **Capacity Trade-off vs. Placement Delta:** In unconstrained mode, an average of **59.6 meeting requests per instance** (and 61 on Seed 42) directly contained attendees with clearance deficits. Enforcing strict attendee clearance reduced average scheduled placements from 112.8 to 70.2 (a net delta of **42.6 scheduled placements**, and 41 on Seed 42). This 42.6 placement difference is caused by downstream cascading heuristic room and timeslot contention dynamics (as queued requests shift slot competition for remaining meetings), and is distinct from the measured count of 59.6 clearance deficits.
 - **Recommendation:** Deploy strict attendee clearance checks at intake. Prioritize meeting requests via weighted priority scoring to maximize high-classification diplomatic outcomes under facility and security constraints.
 - **Limitation:** The benchmark is evaluated on synthetic consular scheduling distributions and does not reflect real-time last-minute cancellation volatility, variable attendee travel times, or ad-hoc VIP room overrides.
 
@@ -33,10 +33,10 @@ Evaluated on Seed 42 (180 meeting requests, 20 rooms, 150 personnel):
 
 | Scheduling Policy | Meetings Scheduled | Requests Queued | Fill Rate (%) | Priority Points | Attendee Violations | Room Violations | Overlap Violations | Runtime |
 |:---|---:|---:|---:|---:|---:|---:|---:|---:|
-| Priority greedy (Unconstrained) | 107 | 73 | 59.4% | 357 | 61 | 0 | 0 | ~12.83 ms |
-| **Priority greedy (Strict clearance)** | **66** | 114 | 36.7% | **201** | 0 | 0 | 0 | ~7.89 ms |
-| Arrival order baseline (Strict) | 67 | 113 | 37.2% | 190 | 0 | 0 | 0 | ~5.18 ms |
-| Shortest duration first (Strict) | 62 | 118 | 34.4% | 167 | 0 | 0 | 0 | ~3.68 ms |
+| Priority greedy (Unconstrained) | 107 | 73 | 59.4% | 357 | 61 | 0 | 0 | ~6.79 ms |
+| **Priority greedy (Strict clearance)** | **66** | 114 | 36.7% | **201** | 0 | 0 | 0 | ~4.5 ms |
+| Arrival order baseline (Strict) | 67 | 113 | 37.2% | 190 | 0 | 0 | 0 | ~4.21 ms |
+| Shortest duration first (Strict) | 62 | 118 | 34.4% | 167 | 0 | 0 | 0 | ~2.43 ms |
 
 ---
 
@@ -46,10 +46,10 @@ Evaluated across 5 deterministic pseudo-random seeds (42, 100, 2026, 31415, 8888
 
 | Scheduling Policy | Avg Scheduled | Avg Queued | Avg Fill Rate | Avg Priority Points | Avg Attendee Violations | Avg Room Violations | Avg Overlap Violations | Avg Runtime |
 |:---|---:|---:|---:|---:|---:|---:|---:|---:|
-| Priority greedy (Unconstrained) | 112.8 | 67.2 | 62.7% | 394 | 59.6 | 0 | 0 | ~5.14 ms |
-| **Priority greedy (Strict clearance)** | **70.2** | 109.8 | 39% | **220.4** | 0 | 0 | 0 | ~1.9 ms |
-| Arrival order baseline (Strict) | 70 | 110 | 38.9% | 208.4 | 0 | 0 | 0 | ~1.95 ms |
-| Shortest duration first (Strict) | 68.6 | 111.4 | 38.1% | 199.8 | 0 | 0 | 0 | ~1.22 ms |
+| Priority greedy (Unconstrained) | 112.8 | 67.2 | 62.7% | 394 | 59.6 | 0 | 0 | ~4.26 ms |
+| **Priority greedy (Strict clearance)** | **70.2** | 109.8 | 39% | **220.4** | 0 | 0 | 0 | ~1.72 ms |
+| Arrival order baseline (Strict) | 70 | 110 | 38.9% | 208.4 | 0 | 0 | 0 | ~1.62 ms |
+| Shortest duration first (Strict) | 68.6 | 111.4 | 38.1% | 199.8 | 0 | 0 | 0 | ~1.2 ms |
 
 ---
 

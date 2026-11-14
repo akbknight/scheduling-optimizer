@@ -1,0 +1,16 @@
+{
+  "name": "scheduling-optimizer",
+  "version": "1.0.0",
+  "description": "Diplomatic & Consular Facility Scheduling Optimizer",
+  "scripts": {
+    "test": "node tests/test_clearance_validation.cjs",
+    "benchmark": "node scripts/benchmark_scheduler.cjs"
+  },
+  "keywords": [
+    "scheduling",
+    "constraint-satisfaction",
+    "heuristic"
+  ],
+  "author": "Akshay Kumar",
+  "license": "MIT"
+}
