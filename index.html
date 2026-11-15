@@ -742,6 +742,8 @@ function runOptimizer() {
   const data = generateData(cfg, 42);
   const result = runScheduler(data, cfg);
   lastResult = result;
+  window.lastResult = result;
+  window.enforceAttendeeClearance = enforceAttendeeClearance;
 
   renderKPIs(result, data);
   renderGantt(result, data);
@@ -793,11 +795,6 @@ function toggleSimulation() {
   } else {
     activeMeetingCount = 180;
     btn.textContent = '⚡ Stress Test (250 Req)';
-    btn.style.borderColor = 'var(--border)';
-    btn.style.color = 'var(--text-2)';
-  }
-  runOptimizer();
-}
     btn.style.borderColor = 'var(--border)';
     btn.style.color = 'var(--text-2)';
   }

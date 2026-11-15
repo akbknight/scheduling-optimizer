@@ -3,7 +3,8 @@
   "version": "1.0.0",
   "description": "Diplomatic & Consular Facility Scheduling Optimizer",
   "scripts": {
-    "test": "node tests/test_clearance_validation.cjs",
+    "test": "node tests/test_clearance_validation.cjs && node tests/test_browser_parity.cjs",
+    "test:browser": "node tests/test_browser_smoke.cjs",
     "benchmark": "node scripts/benchmark_scheduler.cjs"
   },
   "keywords": [
@@ -12,5 +13,8 @@
     "heuristic"
   ],
   "author": "Akshay Kumar",
-  "license": "MIT"
+  "license": "MIT",
+  "devDependencies": {
+    "puppeteer-core": "^25.17.0"
+  }
 }
